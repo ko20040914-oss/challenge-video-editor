@@ -1,16 +1,22 @@
-2026-11-01 04:45:41 INFO    プロジェクト: Google AI Challenge 応募動画 (90秒テンプレート)  960x540 30fps  aspect=16:9  cuts=13
-2026-11-01 04:45:44 INFO      [1/13] 01_hook        hook      4.00s  (2.1s)
-2026-11-01 04:45:45 INFO      [2/13] 02_problem_title title     2.50s  (0.3s)
-2026-11-01 04:45:47 INFO      [3/13] 03_problem     normal    6.62s  (2.4s)  jumpcut 13.15s→6.62s
-2026-11-01 04:45:54 INFO      [4/13] 04_problem_data normal    9.90s  (6.8s)
-2026-11-01 04:45:54 INFO      [5/13] 05_solution_title title     2.50s  (0.5s)
-2026-11-01 04:46:03 INFO      [6/13] 06_solution    normal   10.00s  (8.9s)
-2026-11-01 04:46:04 INFO      [7/13] 07_demo_title  title     2.50s  (0.3s)
-2026-11-01 04:46:07 INFO      [8/13] 08_demo        normal   12.00s  (3.2s)
-2026-11-01 04:46:09 INFO      [9/13] 09_demo2       normal    5.49s  (2.1s)  jumpcut 11.0s→5.49s
-2026-11-01 04:46:09 INFO      [10/13] 10_impact_title title     2.50s  (0.3s)
-2026-11-01 04:46:17 INFO      [11/13] 11_impact      normal   10.00s  (7.8s)
-2026-11-01 04:46:30 INFO      [12/13] 12_future      normal   14.00s  (12.6s)
-2026-11-01 04:46:30 INFO      [13/13] 13_cta         title     8.00s  (0.7s)
-2026-11-01 04:47:03 INFO      最終合成 (テロップ/BGM/SE/ラウドネス) 24.7s
-2026-11-01 04:47:03 INFO    完了: out/challenge_90s.mp4  (90.03s, 4.9 MB, 960x540)
+2026-11-01 05:55:37 INFO    プロジェクト: Google AI Challenge 応募動画 (90秒テンプレート)  960x540 30fps  aspect=16:9  cuts=13
+2026-11-01 05:55:37 INFO      フォント emphasis → IPAGothic
+2026-11-01 05:55:37 INFO      フォント hook     → IPAGothic
+2026-11-01 05:55:37 INFO      フォント label    → IPAGothic
+2026-11-01 05:55:37 INFO      フォント subtitle → IPAGothic
+2026-11-01 05:55:37 INFO      フォント title    → IPAGothic
+2026-11-01 05:55:40 INFO      [1/13] 01_hook        hook      4.00s  (1.7s)
+2026-11-01 05:55:40 INFO      [2/13] 02_problem_title title     2.50s  (0.3s)
+2026-11-01 05:55:42 INFO      [3/13] 03_problem     normal    6.78s  (2.2s)  jumpcut 13.15s→6.78s
+2026-11-01 05:55:49 INFO      [4/13] 04_problem_data normal    9.90s  (7.0s)
+2026-11-01 05:55:50 INFO      [5/13] 05_solution_title title     2.50s  (0.4s)
+2026-11-01 05:55:59 INFO      [6/13] 06_solution    normal   10.00s  (9.0s)
+2026-11-01 05:55:59 INFO      [7/13] 07_demo_title  title     2.50s  (0.5s)
+2026-11-01 05:56:02 INFO      [8/13] 08_demo        normal   12.00s  (3.3s)
+2026-11-01 05:56:05 INFO      [9/13] 09_demo2       normal    5.61s  (2.4s)  jumpcut 11.0s→5.61s
+2026-11-01 05:56:05 INFO      [10/13] 10_impact_title title     2.50s  (0.3s)
+2026-11-01 05:56:12 INFO      [11/13] 11_impact      normal   10.00s  (7.3s)
+2026-11-01 05:56:25 INFO      [12/13] 12_future      normal   14.00s  (12.2s)
+2026-11-01 05:56:25 INFO      [13/13] 13_cta         title     8.00s  (0.7s)
+2026-11-01 05:56:26 INFO      パンチズーム 1 回 (0.7 回/分)、ツッコミ 0 回 (0.0 回/分)
+2026-11-01 05:56:57 INFO      最終合成 (テロップ/BGM/SE/ラウドネス) 24.1s
+2026-11-01 05:56:57 INFO    完了: out/challenge_90s.mp4  (90.29s, 5.0 MB, 960x540)

@@ -9,29 +9,40 @@
     "output": "../out/sample_30s.mp4",
     "bgm": {
       "file": "assets/bgm.wav",
-      "volume": 0.4,
       "fade_in": 0.5,
-      "fade_out": 2.0,
-      "ducking": { "enabled": true, "threshold": 0.04, "ratio": 6, "attack": 15, "release": 350 }
-    },
-    "styles": {
-      "subtitle": { "size": 76, "outer_outline_color": "#1E64FF", "outer_outline": 6,
-                    "highlight": { "color": "#FFE600", "scale": 1.3 } }
+      "fade_out": 2.0
     },
     "overrides": {
       "9:16": {
         "styles": {
-          "default":  { "size": 64, "margin_v": 330, "margin_h": 60 },
-          "subtitle": { "size": 64, "margin_v": 330 },
-          "hook":     { "size": 112 },
-          "emphasis": { "size": 80 },
-          "title":    { "size": 88 }
+          "hook": {
+            "size": 112
+          },
+          "emphasis": {
+            "size": 80
+          },
+          "title": {
+            "size": 88
+          }
         },
         "cuts": {
-          "talk":  { "fit": "blur" },
-          "broll": { "fit": "blur", "pip": { "source": "assets/wipe.mp4", "position": "tr", "scale": 0.5, "start": 0.3 } }
+          "talk": {
+            "fit": "blur"
+          },
+          "broll": {
+            "fit": "blur",
+            "pip": {
+              "source": "assets/wipe.mp4",
+              "position": "tr",
+              "scale": 0.5,
+              "start": 0.3
+            }
+          }
         }
       }
+    },
+    "se_library": {
+      "pop": "assets/se_pop.wav"
     }
   },
   "cuts": [
@@ -40,33 +51,98 @@
       "type": "hook",
       "duration": 4.0,
       "telop": "90秒で\n**未来**が変わる",
-      "narration": { "file": "assets/nar_hook.wav", "offset": 0.4 },
-      "se": [ { "file": "assets/se_impact.wav", "at": 0.0, "volume": 0.9 } ]
+      "narration": {
+        "file": "assets/nar_hook.wav",
+        "offset": 0.4
+      },
+      "se": [
+        {
+          "file": "assets/se_impact.wav",
+          "at": 0.0,
+          "volume": 0.9
+        }
+      ]
     },
     {
       "id": "talk",
       "source": "assets/talk.mp4",
-      "jumpcut": { "noise": "-35dB", "min_silence": 0.35, "padding": 0.1 },
+      "jumpcut": {
+        "keep_pauses": [
+          {
+            "type": "scene_change",
+            "at": 7.0
+          },
+          {
+            "type": "before_punchline",
+            "at": 10.7
+          },
+          {
+            "type": "after_punchline",
+            "at": 12.6
+          }
+        ]
+      },
       "telop": [
-        { "text": "ジャンプカット：無音を自動カット", "style": "label" },
-        { "text": "無音を|**自動で**|カット|します", "style": "subtitle", "anim": "words" }
+        {
+          "text": "ジャンプカット：無音を自動カット",
+          "style": "label"
+        },
+        {
+          "text": "無音を**自動で**カット",
+          "preset": "A",
+          "end": 4.1
+        },
+        {
+          "text": "間はちゃんと残す",
+          "preset": "B",
+          "start": 4.1,
+          "end": 6.6
+        },
+        {
+          "text": "オチ前の間もキープ",
+          "preset": "C",
+          "start": 6.6
+        }
       ],
-      "effects": [
-        { "type": "punch_in", "start": 3.2, "to": 1.18 },
-        { "type": "shake", "start": 3.2, "duration": 0.3, "amplitude": 12 }
-      ],
-      "se": [ { "file": "assets/se_pop.wav", "at": 3.2 } ]
+      "effects": [],
+      "se": [
+        {
+          "file": "assets/se_pop.wav",
+          "at": 4.1
+        }
+      ]
     },
     {
       "id": "photo",
       "source": "assets/photo1.png",
-      "duration": 5.0,
+      "duration": 4.2,
       "effects": [
-        { "type": "kenburns", "from": { "zoom": 1.0, "x": 0.5, "y": 0.5 }, "to": { "zoom": 1.6, "x": 0.62, "y": 0.42 } }
+        {
+          "type": "kenburns",
+          "from": {
+            "zoom": 1.0,
+            "x": 0.5,
+            "y": 0.5
+          },
+          "to": {
+            "zoom": 1.6,
+            "x": 0.62,
+            "y": 0.42
+          }
+        }
       ],
       "narration": "assets/nar_photo.wav",
-      "telop": { "text": "静止画も|**Ken Burns**|で|動かす", "style": "subtitle", "anim": "karaoke", "word_interval": 0.45 },
-      "se": [ { "file": "assets/se_whoosh.wav", "at": 0.0, "volume": 0.8 } ]
+      "telop": {
+        "text": "静止画も**ズーム**で動かす",
+        "preset": "A"
+      },
+      "se": [
+        {
+          "file": "assets/se_whoosh.wav",
+          "at": 0.0,
+          "volume": 0.8
+        }
+      ]
     },
     {
       "id": "broll",
@@ -74,36 +150,98 @@
       "source_volume": 0,
       "duration": "narration",
       "narration": "assets/nar_broll.wav",
-      "jumpcut": { "target": "narration", "min_silence": 0.5 },
-      "pip": { "source": "assets/wipe.mp4", "position": "tr", "scale": 0.3, "start": 0.3, "border": 6 },
-      "effects": [ { "type": "zoom_in", "to": 1.08, "ease": "linear" } ],
+      "jumpcut": {
+        "target": "narration",
+        "min_silence": 0.5
+      },
+      "pip": {
+        "source": "assets/wipe.mp4",
+        "position": "tr",
+        "scale": 0.3,
+        "start": 0.3,
+        "border": 6
+      },
+      "effects": [
+        {
+          "type": "zoom_in",
+          "to": 1.08,
+          "ease": "linear"
+        }
+      ],
       "telop": [
-        { "text": "ワイプで|**2画面**|同時に", "style": "subtitle", "anim": "words", "end": 2.6 },
-        { "text": "BGMは声に合わせて\n{c=#00E5FF,s=1.25}自動で小さく{/}", "style": "subtitle", "anim": "pop", "start": 2.6 }
+        {
+          "text": "ワイプで**2画面**同時に",
+          "preset": "A",
+          "end": 2.6
+        },
+        {
+          "text": "BGMは声に合わせて\n{c=#66D9FF}自動で小さく{/}",
+          "preset": "A",
+          "start": 2.6
+        }
       ]
     },
     {
       "id": "pan",
       "source": "assets/photo2.png",
-      "duration": 5.0,
-      "effects": [ { "type": "pan", "direction": "right", "zoom": 1.35 } ],
+      "duration": 4.5,
+      "effects": [
+        {
+          "type": "pan",
+          "direction": "right",
+          "zoom": 1.35
+        }
+      ],
       "narration": "assets/nar_pan.wav",
-      "telop": { "text": "カット表から{c=#7CFC00,s=1.2}全部自動{/}で生成", "anim": "slide_up" },
-      "se": [ { "file": "assets/se_pop.wav", "at": 0.15 } ]
+      "telop": [
+        {
+          "text": "カット表から**全部自動**で生成",
+          "preset": "A",
+          "end": 3.2
+        },
+        {
+          "text": "編集ソフトいらず",
+          "preset": "C_light",
+          "start": 3.2
+        }
+      ],
+      "se": []
     },
     {
       "id": "outro",
       "type": "title",
-      "duration": 4.5,
+      "duration": 4.2,
       "telop": [
-        { "text": "Google AI Challenge\n**応募作品**", "style": "title", "anim": "pop" },
-        { "text": "Made with ffmpeg + vedit", "style": "label", "start": 0.6, "anim": "fade" }
+        {
+          "text": "Google AI Challenge\n**応募作品**",
+          "style": "title",
+          "anim": "pop"
+        },
+        {
+          "text": "Made with ffmpeg + vedit",
+          "style": "label",
+          "start": 0.6,
+          "anim": "fade"
+        }
       ],
       "effects": [
-        { "type": "zoom_out", "from": 1.15, "to": 1.0, "ease": "out" },
-        { "type": "fade_out", "duration": 0.6 }
+        {
+          "type": "zoom_out",
+          "from": 1.15,
+          "to": 1.0,
+          "ease": "out"
+        },
+        {
+          "type": "fade_out",
+          "duration": 0.6
+        }
       ],
-      "se": [ { "file": "assets/se_pop.wav", "at": 0.05 } ]
+      "se": [
+        {
+          "file": "assets/se_pop.wav",
+          "at": 0.05
+        }
+      ]
     }
   ]
 }

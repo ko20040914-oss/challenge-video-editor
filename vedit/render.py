@@ -10,6 +10,7 @@ import time
 from pathlib import Path
 from typing import Any
 
+from . import presets as P
 from .cutlist import load_cutlist
 from .media import RenderError, duration_of, probe, require_tools, run
 from .segment import plan_cut, render_segment, resolve
@@ -87,6 +88,26 @@ def measure_loudness(seg_inputs: list[list[str]], n: int, total: float, project:
             f":linear=true")
 
 
+def _check_rhythm(project: dict[str, Any], plans: list, telop_events: list[dict[str, Any]],
+                  total: float) -> None:
+    """仕様の頻度・配分の目安と比べてログに出す (警告のみ)."""
+    minutes = max(total / 60.0, 1e-6)
+    n_punch = sum(1 for pl in plans for e in pl.cut["effects"] if e["type"] in ("punch_zoom", "punch_in"))
+    n_c = sum(1 for ev in telop_events if ev["group"] == "C")
+    log.info("  パンチズーム %d 回 (%.1f 回/分)、ツッコミ %d 回 (%.1f 回/分)", n_punch, n_punch / minutes,
+             n_c, n_c / minutes)
+    if n_punch / minutes > P.PUNCH_MAX_PER_MIN:
+        log.warning("パンチズームが %.1f 回/分です (仕様: 1分に%d回まで)", n_punch / minutes, P.PUNCH_MAX_PER_MIN)
+    if n_c / minutes > P.TSUKKOMI_MAX_PER_MIN:
+        log.warning("ツッコミが %.1f 回/分です (仕様: 1分に%d回まで)", n_c / minutes, P.TSUKKOMI_MAX_PER_MIN)
+    grouped = [ev for ev in telop_events if ev["group"]]
+    if grouped:
+        tot = sum(ev["end"] - ev["start"] for ev in grouped)
+        share = {g: sum(ev["end"] - ev["start"] for ev in grouped if ev["group"] == g) / tot for g in P.SHARE_TARGET}
+        log.info("  プリセット配分 (表示時間): " + " / ".join(
+            f"{g} {share[g] * 100:.0f}% (目安 {P.SHARE_TARGET[g] * 100:.0f}%)" for g in P.SHARE_TARGET))
+
+
 def render(cutlist_path: str | Path, output: str | None = None, aspect: str | None = None,
            preview: bool = False, keep_temp: bool = False, dry_run: bool = False,
            project_path: str | None = None) -> dict[str, Any]:
@@ -135,6 +156,14 @@ def _render(cutlist_path: Path, project: dict[str, Any], cuts: list[dict[str, An
 
     log.info("プロジェクト: %s  %dx%d %sfps  aspect=%s  cuts=%d", project["title"], W, H, project["fps"],
              project["aspect"], len(cuts))
+    used_styles = {t["style"] for c in cuts for t in c["telop"]}
+    for name in sorted(used_styles):
+        f = project["_fonts"][name]
+        req = f["requested"] if isinstance(f["requested"], list) else [f["requested"]]
+        if f["found"]:
+            log.info("  フォント %-8s → %s", name, f["used"])
+        else:
+            log.info("  フォント %-8s → %s (候補 %s が未インストールのため代替)", name, f["used"], " / ".join(req))
 
     # 1) 計画 (長さ・ジャンプカット区間の決定)
     plans = [plan_cut(c, project, base) for c in cuts]
@@ -165,13 +194,30 @@ def _render(cutlist_path: Path, project: dict[str, Any], cuts: list[dict[str, An
     # 4) テロップ (ASS)
     ass = AssBuilder(project)
     se_events = []
+    lib = project.get("se_library") or {}
+    telop_events = []
     for plan, tl in zip(plans, timeline):
         for t in plan.cut["telop"]:
-            ass.add(t, tl["start"], tl["duration"])
+            ev = ass.add(t, tl["start"], tl["duration"], where=f"cut '{plan.cut['id']}'")
+            if ev is None:
+                continue
+            telop_events.append(ev)
+            # テロップ出現と同時 (0〜30ms 以内) に SE。プリセット A は "pop"
+            se_name = t.get("se", project["styles"][t["style"]].get("se"))
+            if se_name:
+                se_file = lib.get(se_name, se_name)
+                if se_name in lib or Path(resolve(base, se_file)).suffix:
+                    p = resolve(base, se_file)
+                    probe(p)
+                    se_events.append({"file": se_file, "path": p, "time": ev["start"],
+                                      "volume": t.get("se_volume", 1.0)})
+                else:
+                    log.warning("テロップ SE '%s' が project.se_library にありません (スキップ)", se_name)
         for se in plan.cut["se"]:
             p = resolve(base, se["file"])
             probe(p)
             se_events.append({**se, "path": p, "time": tl["start"] + float(se.get("at", 0.0))})
+    _check_rhythm(project, plans, telop_events, total)
     ass_path = work / "telops.ass"
     ass_path.write_text(ass.render(), encoding="utf-8")
 

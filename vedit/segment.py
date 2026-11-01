@@ -6,11 +6,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from . import presets as P
 from .media import MediaInfo, RenderError, detect_silence, probe, run
 
 log = logging.getLogger("vedit")
 
-MOTION = {"zoom_in", "zoom_out", "kenburns", "pan", "punch_in"}
+MOTION = {"zoom_in", "zoom_out", "kenburns", "pan", "punch_in"}   # ベースの動き (1 カット 1 つ)
+PUNCH = {"punch_zoom"}   # ベースの動きに掛け算で重ねる (複数可。強調テロップと同期)
 OTHER = {"shake", "fade_in", "fade_out", "flash"}
 
 
@@ -40,6 +42,43 @@ def keep_intervals(silences: list[tuple[float, float]], total: float, padding: f
         else:
             merged.append([a, b])
     return [(a, b) for a, b in merged if b - a >= min_keep]
+
+
+def apply_pause_whitelist(silences: list[tuple[float, float]], pauses: list[dict[str, Any]],
+                          padding: float) -> tuple[list[tuple[float, float]], list[dict[str, Any]]]:
+    """ホワイトリストに該当する無音を「間」として指定秒だけ残す.
+
+    pauses: [{"type": "before_punchline"|"after_punchline"|"scene_change", "at": 秒, "duration": 秒(任意)}]
+    at を含む無音区間 (無ければ最も近い無音区間) を、残す長さ L になるよう中央部分だけ削る。
+    keep_intervals の padding が両側に付くので、削る区間は (s + a, e - a), a = (L - 2*padding) / 2。
+    """
+    out = list(silences)
+    report = []
+    for p in pauses:
+        spec = P.PAUSES[p["type"]]
+        L = float(p.get("duration", spec["default"]))
+        lo, hi = spec["range"]
+        if not lo <= L <= hi:
+            log.warning("間 %s の長さ %.2fs は仕様の範囲 %.1f〜%.1f秒の外です", spec["label"], L, lo, hi)
+        if not out:
+            log.warning("間 %s (at=%.2f): 無音区間がありません", spec["label"], p["at"])
+            continue
+        at = float(p["at"])
+        idx = min(range(len(out)), key=lambda i: 0 if out[i][0] <= at <= out[i][1]
+                  else min(abs(out[i][0] - at), abs(out[i][1] - at)))
+        s, e = out[idx]
+        if not s <= at <= e:
+            log.warning("間 %s: at=%.2f は無音区間の外なので、最も近い無音 %.2f〜%.2f を使います",
+                        spec["label"], at, s, e)
+        kept = min(L, e - s)
+        if e - s <= L:
+            out.pop(idx)            # 無音全体が L 以下 → 丸ごと残す
+        else:
+            a = max((L - 2 * padding) / 2, 0.0)
+            out[idx] = (s + a, e - a)
+        report.append({"type": p["type"], "label": spec["label"], "at": at,
+                       "silence": [round(s, 2), round(e, 2)], "kept": round(kept, 2)})
+    return out, report
 
 
 def select_expr(keeps: list[tuple[float, float]]) -> str:
@@ -80,10 +119,12 @@ def plan_cut(cut: dict[str, Any], project: dict[str, Any], base: Path) -> CutPla
             if not src.has_audio:
                 raise RenderError(f"cut '{cut['id']}': 音声のない動画にはジャンプカットできません")
             sil = detect_silence(src.path, jc["noise"], jc["min_silence"], plan.src_in, plan.src_len)
+            sil, pause_rep = apply_pause_whitelist(sil, jc.get("keep_pauses") or [], jc["padding"])
             plan.keeps = keep_intervals(sil, plan.src_len, jc["padding"], jc["min_keep"])
             natural = sum(b - a for a, b in plan.keeps)
             plan.report["jumpcut"] = {"target": "source", "before": round(plan.src_len, 2),
-                                      "after": round(natural, 2), "segments": len(plan.keeps)}
+                                      "after": round(natural, 2), "segments": len(plan.keeps),
+                                      "kept_pauses": pause_rep}
     else:
         natural = None
 
@@ -93,11 +134,13 @@ def plan_cut(cut: dict[str, Any], project: dict[str, Any], base: Path) -> CutPla
         plan.narr_len = plan.narr.duration or 0.0
         if jc and jc_target == "narration":
             sil = detect_silence(plan.narr.path, jc["noise"], jc["min_silence"])
+            sil, pause_rep = apply_pause_whitelist(sil, jc.get("keep_pauses") or [], jc["padding"])
             plan.narr_keeps = keep_intervals(sil, plan.narr_len, jc["padding"], jc["min_keep"])
             before = plan.narr_len
             plan.narr_len = sum(b - a for a, b in plan.narr_keeps)
             plan.report["jumpcut"] = {"target": "narration", "before": round(before, 2),
-                                      "after": round(plan.narr_len, 2), "segments": len(plan.narr_keeps)}
+                                      "after": round(plan.narr_len, 2), "segments": len(plan.narr_keeps),
+                                      "kept_pauses": pause_rep}
 
     narr_total = (float(narr["offset"]) + plan.narr_len + project["defaults"]["narration_tail"]) if narr else None
     dur = cut.get("duration")
@@ -126,10 +169,25 @@ def _ease(p: str, ease: str) -> str:
     return f"(0.5-0.5*cos(PI*{p}))"
 
 
-def motion_filter(eff: dict[str, Any], W: int, H: int, fps: int, dur: float) -> str:
-    """ズーム / パン / Ken Burns を zoompan で実現 (入力は 2W x 2H にスケール済み)."""
-    t = eff["type"]
-    if t == "zoom_in":
+def punch_factor(eff: dict[str, Any], fps: int) -> str:
+    """パンチズーム (仕様: 100→108〜115% を 0.15〜0.25秒で寄せ、0.3〜0.5秒保持して戻す) の倍率式."""
+    st = float(eff.get("start", 0.0))
+    d = max(float(eff.get("duration", P.PUNCH_IN_SEC)), 1.0 / fps)
+    hold = float(eff.get("hold", P.PUNCH_HOLD_SEC))
+    to = float(eff.get("to", P.PUNCH_TO))
+    p = _ease(f"clip((on/{fps}-{st})/{d},0,1)", eff.get("ease", "out"))
+    return f"(1+({to}-1)*{p}*lt(on/{fps},{st + d + hold}))"
+
+
+def motion_filter(eff: dict[str, Any] | None, W: int, H: int, fps: int, dur: float,
+                  punches: list[dict[str, Any]] | None = None) -> str:
+    """ズーム / パン / Ken Burns を zoompan で実現 (入力は 2W x 2H にスケール済み).
+    punches (パンチズーム) はベースの動きのズーム倍率に掛け算で重ねる。"""
+    t = eff["type"] if eff else None
+    if t is None:
+        eff = {}
+        a = b = {"zoom": 1.0, "x": 0.5, "y": 0.5}
+    elif t == "zoom_in":
         a = {"zoom": eff.get("from", 1.0), "x": eff.get("x", 0.5), "y": eff.get("y", 0.5)}
         b = {"zoom": eff.get("to", 1.2), "x": eff.get("x", 0.5), "y": eff.get("y", 0.5)}
     elif t == "punch_in":  # 強調用の一瞬のズーム (「ここ大事!」)
@@ -157,7 +215,9 @@ def motion_filter(eff: dict[str, Any], W: int, H: int, fps: int, dur: float) -> 
     length = float(eff.get("duration", dur - start))
     length = max(length, 1.0 / fps)
     p = _ease(f"clip((on/{fps}-{start})/{length},0,1)", eff.get("ease", "inout"))
-    z = f"{a['zoom']}+({b['zoom']}-{a['zoom']})*{p}"
+    z = f"({a['zoom']}+({b['zoom']}-{a['zoom']})*{p})"
+    for pz in punches or []:
+        z += "*" + punch_factor(pz, fps)
     cx = f"({a['x']}+({b['x']}-{a['x']})*{p})"
     cy = f"({a['y']}+({b['y']}-{a['y']})*{p})"
     x = f"clip({cx}*iw-iw/zoom/2,0,iw-iw/zoom)"
@@ -233,9 +293,10 @@ def build_segment(plan: CutPlan, project: dict[str, Any], base: Path, out_path: 
 
     effects = cut["effects"]
     for e in effects:
-        if e.get("type") not in MOTION | OTHER:
-            raise RenderError(f"cut '{cut['id']}': 未知の効果 {e.get('type')} (使えるもの: {sorted(MOTION | OTHER)})")
+        if e.get("type") not in MOTION | PUNCH | OTHER:
+            raise RenderError(f"cut '{cut['id']}': 未知の効果 {e.get('type')} (使えるもの: {sorted(MOTION | PUNCH | OTHER)})")
     motions = [e for e in effects if e["type"] in MOTION]
+    punches = [e for e in effects if e["type"] in PUNCH]
     if len(motions) > 1:
         raise RenderError(f"cut '{cut['id']}': ズーム/パン系の効果は 1 カットに 1 つまでです")
 
@@ -244,11 +305,12 @@ def build_segment(plan: CutPlan, project: dict[str, Any], base: Path, out_path: 
     if plan.keeps:
         v += f",select='{select_expr(plan.keeps)}',setpts=N/{fps}/TB"
     g.chains.append(v + "[v0]")
-    fw, fh = (W * 2, H * 2) if motions else (W, H)
+    zoomed = bool(motions or punches)
+    fw, fh = (W * 2, H * 2) if zoomed else (W, H)
     g.chains += fit_filter(cut["fit"], fw, fh, "v0", "v1")
     cur = "v1"
-    if motions:
-        g.chains.append(f"[{cur}]{motion_filter(motions[0], W, H, fps, dur)}[v2]")
+    if zoomed:
+        g.chains.append(f"[{cur}]{motion_filter(motions[0] if motions else None, W, H, fps, dur, punches)}[v2]")
         cur = "v2"
     shakes = [e for e in effects if e["type"] == "shake"]
     if shakes:

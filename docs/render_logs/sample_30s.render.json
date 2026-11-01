@@ -4,7 +4,7 @@
   "aspect": "16:9",
   "resolution": "1920x1080",
   "fps": 30,
-  "planned_duration": 30.01,
+  "planned_duration": 30.136,
   "timeline": [
     {
       "id": "hook",
@@ -16,53 +16,86 @@
       "id": "talk",
       "type": "normal",
       "start": 4.0,
-      "duration": 6.78,
+      "duration": 8.426,
       "jumpcut": {
         "target": "source",
         "before": 13.15,
-        "after": 6.78,
-        "segments": 4
+        "after": 8.43,
+        "segments": 4,
+        "kept_pauses": [
+          {
+            "type": "scene_change",
+            "label": "場面転換",
+            "at": 7.0,
+            "silence": [
+              5.99,
+              7.99
+            ],
+            "kept": 0.75
+          },
+          {
+            "type": "before_punchline",
+            "label": "オチ前",
+            "at": 10.7,
+            "silence": [
+              9.84,
+              11.52
+            ],
+            "kept": 0.45
+          },
+          {
+            "type": "after_punchline",
+            "label": "オチ後",
+            "at": 12.6,
+            "silence": [
+              12.2,
+              13.15
+            ],
+            "kept": 0.95
+          }
+        ]
       }
     },
     {
       "id": "photo",
       "type": "normal",
-      "start": 10.78,
-      "duration": 5.0
+      "start": 12.426,
+      "duration": 4.2
     },
     {
       "id": "broll",
       "type": "normal",
-      "start": 15.78,
-      "duration": 4.73,
+      "start": 16.626,
+      "duration": 4.81,
       "jumpcut": {
         "target": "narration",
         "before": 6.91,
-        "after": 4.38,
-        "segments": 2
+        "after": 4.46,
+        "segments": 2,
+        "kept_pauses": []
       }
     },
     {
       "id": "pan",
       "type": "normal",
-      "start": 20.51,
-      "duration": 5.0
+      "start": 21.436,
+      "duration": 4.5
     },
     {
       "id": "outro",
       "type": "title",
-      "start": 25.51,
-      "duration": 4.5
+      "start": 25.936,
+      "duration": 4.2
     }
   ],
-  "rendered_at": "2026-11-01T04:41:32",
+  "rendered_at": "2026-11-01T05:51:09",
   "target_duration": 30,
   "status": "success",
-  "duration": 30.01,
-  "size_bytes": 9863085,
-  "elapsed_sec": 65.5,
+  "duration": 30.136,
+  "size_bytes": 10444539,
+  "elapsed_sec": 63.4,
   "video": "1920x1080",
   "bgm": true,
-  "se_count": 5,
+  "se_count": 9,
   "loudnorm": true
 }

@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from . import presets as P
 from .media import RenderError
 
 ASPECTS = {"16:9": (16, 9), "9:16": (9, 16), "1:1": (1, 1), "4:5": (4, 5)}
@@ -21,6 +22,9 @@ BUILTIN_STYLES: dict[str, dict[str, Any]] = {
         "box": False, "box_color": "#000000", "box_alpha": 0.35,
         "highlight": {"color": "#FFE600", "scale": 1.25},
         "anim": "pop",
+        # 旧来 (v0.1) のアニメ値。プリセット A/B/C は presets.py の仕様値で上書きする
+        "pop_from": 0.0, "pop_overshoot": 1.18, "pop_ms": 200, "fade_out_ms": 120,
+        "bounce": None, "bounce_ms": 100, "warn_color": "#FF2E3D",
     },
     "hook": {
         "size": 140, "color": "#FFE600", "outline_color": "#000000", "outline": 10,
@@ -82,17 +86,20 @@ DEFAULT_PROJECT: dict[str, Any] = {
     "bgm": None,
     "defaults": {
         "fit": "cover",
-        "jumpcut": {"noise": "-35dB", "min_silence": 0.35, "padding": 0.08, "min_keep": 0.12},
+        # 仕様: 0.4秒以上の無音は原則カット、呼吸 0.15〜0.30秒は残す (前後 0.1秒ずつ = 0.2秒)
+        "jumpcut": {"noise": "-35dB", "min_silence": P.JUMPCUT_MIN_SILENCE, "padding": P.JUMPCUT_PADDING,
+                    "min_keep": 0.12, "keep_pauses": []},
         "narration_tail": 0.35,
     },
     "styles": {},
+    "se_library": {},            # 名前→SE ファイル (例 {"pop": "assets/se_pop.wav"})。プリセット A の「SEポップ」で使う
     "cut_types": {},
     "overrides": {},
 }
 
-DEFAULT_BGM = {"file": None, "volume": 0.35, "fade_in": 1.0, "fade_out": 2.0,
-               "ducking": {"enabled": True, "threshold": 0.04, "ratio": 6, "attack": 15,
-                           "release": 350, "makeup": 1.0}}
+# 仕様「音」: 間では 0.35〜0.45倍、sidechaincompress threshold=0.05 ratio=4 attack=5〜20ms release=200〜400ms
+DEFAULT_BGM = {"file": None, "volume": P.BGM_VOLUME, "fade_in": 1.0, "fade_out": 2.0,
+               "ducking": {"enabled": True, **P.DUCKING, "makeup": 1.0}}
 
 
 def deep_merge(base: Any, over: Any) -> Any:
@@ -260,9 +267,15 @@ def load_cutlist(path: Path, project_path: Path | None = None,
     project["width"], project["height"] = w, h
 
     # スタイル (default を継承)
-    styles = deep_merge(BUILTIN_STYLES, project.get("styles", {}))
+    styles = deep_merge({**BUILTIN_STYLES, **P.PRESET_STYLES}, project.get("styles", {}))
     base = styles["default"]
     project["styles"] = {name: (deep_merge(base, s) if name != "default" else base) for name, s in styles.items()}
+    # フォント: 候補リストから fc-list で見つかった最初のものを使い、無ければ project.font
+    project["_fonts"] = {}
+    for name, st in project["styles"].items():
+        font, found = P.resolve_font(st.get("font"), project["font"])
+        project["_fonts"][name] = {"requested": st.get("font"), "used": font, "found": found}
+        st["font"] = font
 
     if project.get("bgm"):
         project["bgm"] = deep_merge(DEFAULT_BGM, project["bgm"])
@@ -306,13 +319,29 @@ def normalize_cut(cut: dict[str, Any], idx: int, project: dict[str, Any],
         if isinstance(t, str):
             t = {"text": t}
         t = dict(t)
+        if "preset" in t:  # "preset": "A" / "標準" は style の別名
+            t["style"] = P.PRESET_ALIASES.get(t["preset"], t["preset"])
         t.setdefault("style", "default")
+        t["style"] = P.PRESET_ALIASES.get(t["style"], t["style"])
         if t["style"] not in project["styles"]:
-            raise RenderError(f"cut '{c['id']}' 未定義のテロップスタイル: {t['style']}")
+            raise RenderError(f"cut '{c['id']}' 未定義のテロップスタイル/プリセット: {t['style']}")
+        st = project["styles"][t["style"]]
+        br = st.get("brackets")
+        text = str(t.get("text", ""))
+        if br and text and not text.startswith(("（", "(", "「", br[0])):
+            t["text"] = f"{br[0]}{text}{br[1]}"  # ツッコミはカッコ付き表記
         telops.append(t)
     c["telop"] = telops
 
     c["effects"] = [dict(e) for e in _as_list(c.get("effects"))]
+    # 強調テロップ (punch=true) と同時にパンチズームを打つ
+    for t in telops:
+        punch = t.get("punch", project["styles"][t["style"]].get("punch", False))
+        if punch:
+            eff = {"type": "punch_zoom", "start": float(t.get("start", 0.0)), "_sync": True}
+            if isinstance(punch, dict):
+                eff.update(punch)
+            c["effects"].append(eff)
     c["pip"] = [dict(p) for p in _as_list(c.get("pip"))]
     c["se"] = [({"file": s} if isinstance(s, str) else dict(s)) for s in _as_list(c.get("se"))]
 
@@ -327,5 +356,10 @@ def normalize_cut(cut: dict[str, Any], idx: int, project: dict[str, Any],
     if jc:
         jc = {} if jc is True else dict(jc)
         jc = {**project["defaults"]["jumpcut"], **jc}
+        for kp in jc.get("keep_pauses") or []:
+            if kp.get("type") not in P.PAUSES:
+                raise RenderError(f"cut '{c['id']}': keep_pauses の type は {list(P.PAUSES)} のいずれか: {kp.get('type')}")
+            if "at" not in kp:
+                raise RenderError(f"cut '{c['id']}': keep_pauses には at (素材内の秒) が必要です")
     c["jumpcut"] = jc or None
     return c

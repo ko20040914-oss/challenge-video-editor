@@ -1,9 +1,18 @@
-2026-11-01 04:40:53 INFO    プロジェクト: vedit sample (30s)  1920x1080 30fps  aspect=16:9  cuts=6
-2026-11-01 04:41:00 INFO      [1/6] hook           hook      4.00s  (6.3s)
-2026-11-01 04:41:08 INFO      [2/6] talk           normal    6.78s  (7.8s)  jumpcut 13.15s→6.78s
-2026-11-01 04:41:15 INFO      [3/6] photo          normal    5.00s  (7.2s)
-2026-11-01 04:41:20 INFO      [4/6] broll          normal    4.73s  (5.2s)  jumpcut 6.91s→4.38s
-2026-11-01 04:41:27 INFO      [5/6] pan            normal    5.00s  (6.4s)
-2026-11-01 04:41:31 INFO      [6/6] outro          title     4.50s  (4.5s)
-2026-11-01 04:41:58 INFO      最終合成 (テロップ/BGM/SE/ラウドネス) 23.9s
-2026-11-01 04:41:58 INFO    完了: out/sample_30s.mp4  (30.01s, 9.9 MB, 1920x1080)
+2026-11-01 05:50:31 INFO    プロジェクト: vedit sample (30s)  1920x1080 30fps  aspect=16:9  cuts=6
+2026-11-01 05:50:31 INFO      フォント A        → IPAGothic (候補 Source Han Sans JP Heavy / 源ノ角ゴシック JP Heavy / Noto Sans CJK JP Black / Noto Sans JP Black / M PLUS Rounded 1c Black が未インストールのため代替)
+2026-11-01 05:50:31 INFO      フォント B        → IPAGothic (候補 Source Han Sans JP Black / 源ノ角ゴシック JP Black / Noto Sans CJK JP Black / Noto Sans JP Black / M PLUS Rounded 1c Black が未インストールのため代替)
+2026-11-01 05:50:31 INFO      フォント C        → IPAGothic (候補 M PLUS Rounded 1c ExtraBold / M PLUS Rounded 1c Black / Noto Sans JP Black / Source Han Sans JP Heavy / Noto Sans CJK JP Black が未インストールのため代替)
+2026-11-01 05:50:31 INFO      フォント C_light  → IPAGothic (候補 M PLUS Rounded 1c ExtraBold / M PLUS Rounded 1c Black / Noto Sans JP Black / Source Han Sans JP Heavy / Noto Sans CJK JP Black が未インストールのため代替)
+2026-11-01 05:50:31 INFO      フォント hook     → IPAGothic
+2026-11-01 05:50:31 INFO      フォント label    → IPAGothic
+2026-11-01 05:50:31 INFO      フォント title    → IPAGothic
+2026-11-01 05:50:39 INFO      [1/6] hook           hook      4.00s  (6.3s)
+2026-11-01 05:50:48 INFO      [2/6] talk           normal    8.43s  (8.7s)  jumpcut 13.15s→8.43s
+2026-11-01 05:50:54 INFO      [3/6] photo          normal    4.20s  (6.3s)
+2026-11-01 05:50:59 INFO      [4/6] broll          normal    4.81s  (5.1s)  jumpcut 6.91s→4.46s
+2026-11-01 05:51:04 INFO      [5/6] pan            normal    4.50s  (5.5s)
+2026-11-01 05:51:09 INFO      [6/6] outro          title     4.20s  (4.1s)
+2026-11-01 05:51:09 INFO      パンチズーム 1 回 (2.0 回/分)、ツッコミ 2 回 (4.0 回/分)
+2026-11-01 05:51:09 INFO      プリセット配分 (表示時間): A 74% (目安 70%) / B 11% (目安 20%) / C 14% (目安 10%)
+2026-11-01 05:51:35 INFO      最終合成 (テロップ/BGM/SE/ラウドネス) 22.4s
+2026-11-01 05:51:35 INFO    完了: out/sample_30s.mp4  (30.14s, 10.4 MB, 1920x1080)
