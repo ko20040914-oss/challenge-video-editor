@@ -1,0 +1,8 @@
+id,type,source,in,out,duration,fit,telop,telop_style,telop_anim,telop_start,telop_end,effects,pip,narration,narration_offset,source_volume,jumpcut,se
+"# 1行=1カット。effects は「名前:key=val,key=val; 次の効果」、se は「ファイル@秒*音量; ...」。複雑な指定はセルに JSON も可",,,,,,,,,,,,,,,,,,
+hook,hook,,,,4,,90秒で\n**未来**が変わる,,,,,,,assets/nar_hook.wav,0.4,,,assets/se_impact.wav@0*0.9
+talk,,assets/talk.mp4,,,,cover,無音を|**自動で**|カット|します,subtitle,words,,,"punch_in:start=3.2,to=1.18; shake:start=3.2,duration=0.3,amplitude=12",,,,,"noise=-35dB,min_silence=0.35,padding=0.1",assets/se_pop.wav@3.2
+photo,,assets/photo1.png,,,5,,静止画も|**Ken Burns**|で|動かす,subtitle,karaoke,,,"[{""type"":""kenburns"",""from"":{""zoom"":1.0},""to"":{""zoom"":1.6,""x"":0.62,""y"":0.42}}]",,assets/nar_photo.wav,,,,assets/se_whoosh.wav@0*0.8
+broll,,assets/broll.mp4,,,narration,,ワイプで|**2画面**|同時に,subtitle,words,,,"zoom_in:to=1.08,ease=linear","source=assets/wipe.mp4,position=tr,scale=0.3,start=0.3",assets/nar_broll.wav,,0,"target=narration,min_silence=0.5",
+pan,,assets/photo2.png,,,5,,"カット表から{c=#7CFC00,s=1.2}全部自動{/}で生成",,slide_up,,,"pan:direction=right,zoom=1.35",,assets/nar_pan.wav,,,,assets/se_pop.wav@0.15
+outro,title,,,,4.5,,Google AI Challenge\n**応募作品**,title,pop,,,"zoom_out:from=1.15,to=1.0,ease=out; fade_out:duration=0.6",,,,,,assets/se_pop.wav@0.05

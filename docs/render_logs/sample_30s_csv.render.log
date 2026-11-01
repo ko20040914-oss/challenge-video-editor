@@ -1,0 +1,9 @@
+2026-11-01 04:43:21 INFO    プロジェクト: vedit sample (CSV)  960x540 30fps  aspect=16:9  cuts=6
+2026-11-01 04:43:24 INFO      [1/6] hook           hook      4.00s  (1.7s)
+2026-11-01 04:43:26 INFO      [2/6] talk           normal    6.78s  (2.5s)  jumpcut 13.15s→6.78s
+2026-11-01 04:43:31 INFO      [3/6] photo          normal    5.00s  (4.7s)
+2026-11-01 04:43:33 INFO      [4/6] broll          normal    4.73s  (1.8s)  jumpcut 6.91s→4.38s
+2026-11-01 04:43:37 INFO      [5/6] pan            normal    5.00s  (3.8s)
+2026-11-01 04:43:38 INFO      [6/6] outro          title     4.50s  (1.5s)
+2026-11-01 04:43:51 INFO      最終合成 (テロップ/BGM/SE/ラウドネス) 9.3s
+2026-11-01 04:43:51 INFO    完了: out/sample_30s_csv.mp4  (30.01s, 1.7 MB, 960x540)

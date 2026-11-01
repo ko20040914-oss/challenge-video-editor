@@ -1,0 +1,5 @@
+# 生成物 (いつでも再生成できる)
+out/
+examples/assets/
+__pycache__/
+*.pyc

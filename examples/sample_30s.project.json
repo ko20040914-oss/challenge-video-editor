@@ -1,0 +1,15 @@
+{
+  "project": {
+    "title": "vedit sample (CSV)",
+    "aspect": "16:9",
+    "resolution": 1080,
+    "fps": 30,
+    "target_duration": 30,
+    "output": "../out/sample_30s_csv.mp4",
+    "bgm": { "file": "assets/bgm.wav", "volume": 0.4 },
+    "styles": {
+      "subtitle": { "size": 76, "outer_outline_color": "#1E64FF", "outer_outline": 6,
+                    "highlight": { "color": "#FFE600", "scale": 1.3 } }
+    }
+  }
+}

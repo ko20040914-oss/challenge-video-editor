@@ -1,0 +1,110 @@
+{
+  "cutlist": "examples/template_90s.json",
+  "output": "out/challenge_90s.mp4",
+  "aspect": "16:9",
+  "resolution": "960x540",
+  "fps": 30,
+  "planned_duration": 90.009,
+  "timeline": [
+    {
+      "id": "01_hook",
+      "type": "hook",
+      "start": 0.0,
+      "duration": 4.0
+    },
+    {
+      "id": "02_problem_title",
+      "type": "title",
+      "start": 4.0,
+      "duration": 2.5
+    },
+    {
+      "id": "03_problem",
+      "type": "normal",
+      "start": 6.5,
+      "duration": 6.62,
+      "jumpcut": {
+        "target": "source",
+        "before": 13.15,
+        "after": 6.62,
+        "segments": 4
+      }
+    },
+    {
+      "id": "04_problem_data",
+      "type": "normal",
+      "start": 13.12,
+      "duration": 9.9
+    },
+    {
+      "id": "05_solution_title",
+      "type": "title",
+      "start": 23.02,
+      "duration": 2.5
+    },
+    {
+      "id": "06_solution",
+      "type": "normal",
+      "start": 25.52,
+      "duration": 10.0
+    },
+    {
+      "id": "07_demo_title",
+      "type": "title",
+      "start": 35.52,
+      "duration": 2.5
+    },
+    {
+      "id": "08_demo",
+      "type": "normal",
+      "start": 38.02,
+      "duration": 12.0
+    },
+    {
+      "id": "09_demo2",
+      "type": "normal",
+      "start": 50.02,
+      "duration": 5.489,
+      "jumpcut": {
+        "target": "source",
+        "before": 11.0,
+        "after": 5.49,
+        "segments": 3
+      }
+    },
+    {
+      "id": "10_impact_title",
+      "type": "title",
+      "start": 55.509,
+      "duration": 2.5
+    },
+    {
+      "id": "11_impact",
+      "type": "normal",
+      "start": 58.009,
+      "duration": 10.0
+    },
+    {
+      "id": "12_future",
+      "type": "normal",
+      "start": 68.009,
+      "duration": 14.0
+    },
+    {
+      "id": "13_cta",
+      "type": "title",
+      "start": 82.009,
+      "duration": 8.0
+    }
+  ],
+  "rendered_at": "2026-11-01T04:46:31",
+  "target_duration": 90,
+  "status": "success",
+  "duration": 90.033,
+  "size_bytes": 4948720,
+  "elapsed_sec": 81.5,
+  "video": "960x540",
+  "bgm": true,
+  "se_count": 4,
+  "loudnorm": true
+}

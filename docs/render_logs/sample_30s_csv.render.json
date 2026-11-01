@@ -1,0 +1,68 @@
+{
+  "cutlist": "examples/sample_30s.csv",
+  "output": "out/sample_30s_csv.mp4",
+  "aspect": "16:9",
+  "resolution": "960x540",
+  "fps": 30,
+  "planned_duration": 30.01,
+  "timeline": [
+    {
+      "id": "hook",
+      "type": "hook",
+      "start": 0.0,
+      "duration": 4.0
+    },
+    {
+      "id": "talk",
+      "type": "normal",
+      "start": 4.0,
+      "duration": 6.78,
+      "jumpcut": {
+        "target": "source",
+        "before": 13.15,
+        "after": 6.78,
+        "segments": 4
+      }
+    },
+    {
+      "id": "photo",
+      "type": "normal",
+      "start": 10.78,
+      "duration": 5.0
+    },
+    {
+      "id": "broll",
+      "type": "normal",
+      "start": 15.78,
+      "duration": 4.73,
+      "jumpcut": {
+        "target": "narration",
+        "before": 6.91,
+        "after": 4.38,
+        "segments": 2
+      }
+    },
+    {
+      "id": "pan",
+      "type": "normal",
+      "start": 20.51,
+      "duration": 5.0
+    },
+    {
+      "id": "outro",
+      "type": "title",
+      "start": 25.51,
+      "duration": 4.5
+    }
+  ],
+  "rendered_at": "2026-11-01T04:43:39",
+  "target_duration": 30,
+  "status": "success",
+  "duration": 30.01,
+  "size_bytes": 1733098,
+  "elapsed_sec": 29.5,
+  "video": "960x540",
+  "bgm": true,
+  "se_count": 5,
+  "loudnorm": true
+}
